@@ -1,0 +1,41 @@
+# https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
+# https://docs.gitlab.com/ee/user/packages/container_registry/index.html#build-and-push-by-using-gitlab-cicd
+# https://overflow.roche.com/t/final-testing-a-docker-image-within-gitlab-ci/3136/2
+# Tags preserved by cleanup policy:
+#   release-.*
+default:
+  image: docker:19.03.12
+  services:
+    - docker:19.03.12-dind
+  before_script:
+    - docker info
+
+.shared_runners:
+  tags:
+    - Linux
+    - docker
+    - amd64
+
+variables:
+  DOCKER_DRIVER: overlay2
+  IMAGE_TAG0: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  IMAGE_TAG1: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+build Docker image:
+  extends:
+    - .shared_runners
+  stage: build
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - "docker build --cache-from $CI_REGISTRY_IMAGE:latest \
+        --tag $CI_REGISTRY_IMAGE:latest \
+        --tag $IMAGE_TAG0 \
+        --tag $IMAGE_TAG1 \
+        ."
+    - docker push $IMAGE_TAG0
+    - docker push $IMAGE_TAG1
+    - docker push $CI_REGISTRY_IMAGE:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
