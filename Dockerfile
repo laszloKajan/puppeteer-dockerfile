@@ -21,5 +21,5 @@ RUN update-ca-certificates
 
 # Match to dependencies of
 #	https://code.roche.com/sap-aspire/scp/supporting-projects/devops-fb-assign-transport-request/-/blob/master/package.json
-RUN npm install "axios@0.21.0" "command-line-args@5.1.1" "command-line-usage@6.1.0" "puppeteer@chrome-86"
+RUN npm install "axios@0.21.0" "command-line-args@5.1.1" "command-line-usage@6.1.0" "puppeteer@chrome-86" "sprintf-js@1.1.2"
 #RUN npm install "@sap-aspire/assign-transport-request"
